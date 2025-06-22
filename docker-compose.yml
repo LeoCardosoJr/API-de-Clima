@@ -1,0 +1,37 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-weather}
+      POSTGRES_USER: ${POSTGRES_USER:-user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432" 
+
+  redis:
+    image: redis:6-alpine
+    ports:
+      - "6379:6379" 
+
+  app:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgres://user:password@db:5432/weather}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-kf3eYQsdDT6T6NQhPRc4gmoLOIKLQvzFQfigiq4vnFFefuSzODoLehTNVvYLdT5LTA4}
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-True}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+
+volumes:
+  postgres_data:
