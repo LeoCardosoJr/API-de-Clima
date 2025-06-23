@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
+    'drf_spectacular',
     'apps.weather',
 ]
 
@@ -100,6 +101,37 @@ CACHES = {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
     }
+}
+
+# Rate Limiting
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '10/minute',  # Para usuários não autenticados (anônimos)
+        'user': '60/minute',  # Para usuários autenticados
+    }
+}
+
+# Configurações do drf-spectacular
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'API de Clima',
+    'DESCRIPTION': 'API para consulta de dados meteorológicos por cidade',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SWAGGER_UI_SETTINGS': {
+        'deepLinking': True,
+        'persistAuthorization': True,
+        'displayOperationId': True,
+    },
+    'TAGS': [
+        {'name': 'weather', 'description': 'Endpoints relacionados ao clima'},
+        {'name': 'history', 'description': 'Endpoints relacionados ao histórico de consultas'},
+    ],
 }
 
 
