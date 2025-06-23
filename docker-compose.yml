@@ -8,18 +8,20 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     ports:
-      - "5432:5432" 
+      - "5432:5432"
+    restart: unless-stopped
 
   redis:
     image: redis:6-alpine
     ports:
-      - "6379:6379" 
+      - "6379:6379"
+    restart: unless-stopped
 
   app:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    command: sh -c "python manage.py migrate && gunicorn --bind 0.0.0.0:8000 --workers 3 --timeout 120 settings.wsgi:application"
     volumes:
-      - .:/app
+      - ./logs:/var/log/django
     ports:
       - "8000:8000"
     depends_on:
